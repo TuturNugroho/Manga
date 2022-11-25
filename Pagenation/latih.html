@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helllo World</title>
+    <link rel="stylesheet" href="assets/css/bootstrap.css.map">
+    <link rel="stylesheet" href="assets/css/bootstrap.css">
+    <style>
+        #body-column {
+            background-color: aquamarine;
+
+        }
+
+        .row div {
+            /* position: center; */
+            background-color: cadetblue;
+            margin-top: 20px;
+            margin-right: 20px;
+            align-items: center;
+            border-top-left-radius: 30px;
+            border-top-right-radius: 30px;
+            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px;
+        }
+
+        textarea {
+            width: 200px;
+            height: 200px;
+            margin-left: 20px;
+        }
+
+        span {
+            font-weight: bold;
+            text-align: center;
+            margin-left: 10px;
+            position: center;
+            /* padding-left: 80px; */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div id="body-column" class="row g-0 body-coll">
+
+        </div>
+    </div>
+    <div id="body-column"></div>
+    <select onchange="changeLimit(event.target.value)">
+        <option value="6">6</option>
+        <option value="12">12</option>
+        <option value="24">24</option>
+    </select>
+    <!-- <input type="number" name="" id=""onchange="changeLimit(event.target.value)> -->
+    <button onclick="prevPage()">Prev Page</button>
+    <button onclick="nextPage()">Next Page</button>
+    <script>
+        let offset = 0
+        let limit = 6
+
+        const prevPage = () => {
+            if (offset > 0) {
+                offset -= 1;
+            }
+            mangData(`https://api.mangadex.org/manga?offset=${offset}&limit=${limit}&includes[]=cover_art&contentRating[]=safe`)
+        }
+        const nextPage = () => {
+            offset += 7
+            mangData(`https://api.mangadex.org/manga?offset=${offset}&limit=${limit}&includes[]=cover_art&contentRating[]=safe`)
+        }
+        const changeLimit = (newLimit) => {
+            limit = newLimit
+            mangData(`https://api.mangadex.org/manga?offset=${offset}&limit=${limit}&includes[]=cover_art&contentRating[]=safe`)
+        }
+        mangData("https://api.mangadex.org/manga?offset=1&limit=1&includes[]=cover_art&contentRating[]=safe")
+
+        async function mangData(file) {
+            let mangaData
+            let gambar
+            let wrapDiv = document.getElementById("body-column")
+            let divCard = " "
+            await fetch(file).then((response) => {
+                return response.json()
+            }).then((data) => { mangaData = data.data })
+            console.log(mangaData)
+            for (let i = 0; i < mangaData.length; i++) {
+                for (let j = 0; j < mangaData[i].relationships.length; j++) {
+                    if (mangaData[i].relationships[j].type == "cover_art") {
+                        gambar = "https://uploads.mangadex.org/covers/" + mangaData[i].id + "/" + mangaData[i].relationships[j].attributes.fileName
+
+                    }
+                }
+                divCard += `
+                <div class="card" style="width: 18rem;">
+                    <img src="${gambar}" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">${mangaData[i].attributes.title.en}</h5>
+                        <textarea class="card-text">${mangaData[i].attributes.description.en}</textarea>
+                        
+                    </div>
+                </div>`
+                wrapDiv.innerHTML = divCard
+            }
+        }
+    </script>
+</body>
+
+</html>
